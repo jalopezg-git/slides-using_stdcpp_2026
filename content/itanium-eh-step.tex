@@ -1,2 +1,55 @@
 % ==== Itanium ABI EH: Watching it work! ====
 \section{Itanium ABI EH: Watching it work!}
+\begin{frame}{Itanium C++ EH: Recap}
+  \begin{enumerate}
+  \item \inlineCode{\_\_cxa\_throw}: where throwing happens\ldots{}
+    \pause
+
+  \item \ldots{}that calls \inlineCode{\_Unwind\_RaiseException}
+    \pause
+
+  \item \ldots{}that starts a two-phase (search + cleanup) stack unwind\ldots{}
+    \pause
+
+  \item \ldots{}that, at each unwind step calls \alert{\bfseries personality} routine
+    \begin{center}
+      \resizebox{0.5\textwidth}{!}{\input{fig/unwind-personality-rel}}
+    \end{center}
+    \pause
+
+  \item \ldots{}until arriving at a \alert{\bfseries landing pad} that catches
+    \begin{itemize}
+    \item while performing \alert{clean-up} along the way\ldots{}
+    \end{itemize}
+  \end{enumerate}
+
+  \begin{onlyenv}<6->
+    \overlayLayer{\ldots{}and where all the information is in
+      \begin{itemize}
+      \item \texttt{.eh\_frame} / \texttt{.eh\_frame\_hdr} (unwind info)
+      \item \texttt{.gcc\_except\_table} (LSDA)
+    \end{itemize}}
+  \end{onlyenv}
+\end{frame}
+\input{content/case-study}
+
+\begin{frame}{Getting to \texttt{throw}\ldots{}}
+\end{frame}
+
+\begin{frame}{\texttt{throw}!}
+\end{frame}
+
+\begin{frame}{Phase 1: locating a landing pad}
+\end{frame}
+
+\begin{frame}{Phase 2: unwinding and resuming}
+\end{frame}
+
+\begin{frame}{\texttt{throw} (rethrow)!}
+\end{frame}
+
+\begin{frame}{Phase 1: locating a landing pad}
+\end{frame}
+
+\begin{frame}{Phase 2: unwinding and resuming}
+\end{frame}
