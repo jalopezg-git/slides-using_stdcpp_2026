@@ -10,6 +10,7 @@
 \usepackage{fontawesome5}
 \usepackage{emoji}
 \usepackage{qrcode}
+\usepackage{colortbl}
 \usepackage[export]{adjustbox}
 %\ttfamily\DeclareFontShape{T1}{lmtt}{m}{it}
 %                          {<->sub*lmtt/m/sl}{}
@@ -55,6 +56,10 @@
         },
         stack_frame/.style 2 args={stack_frame_base={#1}{0.5in}{#2},text width=1.7in},
         stack_frame_element/.style 2 args={stack_frame_base={}{#1}{#2},text width=1in},
+        CFI_record/.style={rounded corners=3pt,rectangle split,rectangle split parts=#1},
+        CIE/.style={CFI_record=#1,going_below_shade={yellow}{white}},
+        FDE/.style={CFI_record=#1,going_below_shade={white}{white}},
+        call_site_table/.style 2 args={rounded corners=3pt,rectangle split,rectangle split parts=#1,going_below_shade={#2}{white}},
 }
 
 % ---- listings
@@ -102,6 +107,7 @@
 \def\explodingHead{\emoji{exploding-head}}
 \def\faceWithMonocle{\emoji{face-with-monocle}}
 \def\womanDancing{\emoji{woman-dancing}}
+\def\pill{\emoji{pill}}
 
 \def\linkButton#1#2{\tikz\node[draw=teal!50!black!50,minimum height=0,%
         top color=white,bottom color=teal!50!black!20,%

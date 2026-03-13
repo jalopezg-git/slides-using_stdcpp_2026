@@ -1,0 +1,23 @@
+\tikz[>={Latex}]{
+  \graph[tree layout,nodes={font={\footnotesize}}] {
+    "[0x216c] CIE version: 1%
+    \nodepart{two}\texttt{z\textcolor{magenta}{P}\textcolor{cyan}{L}R}%
+    \nodepart{three}align factor: C=1 D=-8%
+    \nodepart{four}ret reg: 16%
+    \nodepart{five}\textcolor{magenta}{$\bullet$}\textcolor{magenta}{P}\textcolor{cyan}{$\bullet$}%
+    \nodepart{six}\texttt{%
+    DW\_CFA\_def\_cfa: reg7 +8\\%
+    DW\_CFA\_offset: reg16 -8}"[CIE=6,text width=2in]
+    <- {
+      "[0x218c] FDE%
+      \nodepart{two}PC range: [0x1220, +0x62]%
+      \nodepart{three}\textcolor{cyan}{L}%
+      \nodepart{four}\texttt{%
+      DW\_CFA\_advance\_loc: 2\\
+      DW\_CFA\_def\_cfa\_offset: +16\\
+      DW\_CFA\_advance\_loc: 1\\
+      DW\_CFA\_def\_cfa\_offset: +24\\
+      \ldots{}}"[FDE=4,text width=2in],
+    };
+  };
+}

@@ -1,0 +1,28 @@
+\tikz[
+  start chain=c going right,node distance=0pt,
+  >={Latex},
+  every node/.style={
+        font={\footnotesize},
+        minimum height=20pt,
+  },
+  encoding/.style={going_below_shade={black}{white}},
+  value/.style={going_below_shade={red}{white}},
+  table/.style={going_below_shade={teal}{white}},
+]{
+  \node(version) [value,on chain=c] {version};
+  \node(eh_frame_ptr_enc) [encoding,on chain=c] {eh\_frame\_ptr\_enc};
+  \node(fde_count_enc) [encoding,on chain=c] {fde\_count\_enc};
+  \node(table_enc) [encoding,on chain=c] {table\_enc};
+  \node(eh_frame_ptr) [value,on chain=c] {eh\_frame\_ptr};
+  \node(fde_count) [value,on chain=c] {fde\_count};
+  %
+  \node(entry) [table,on chain=c] {$\langle$initial location, address$\rangle$};
+
+  \draw[<-] (eh_frame_ptr.north) -- ++(10pt,10pt)
+    node[at end,anchor=south west] {Encoded ptr. to \texttt{.eh\_frame}};
+
+  \draw[decorate,decoration=brace] ([xshift=-2pt,yshift=-2pt]fde_count.south east) -- ([yshift=-2pt]version.south west)
+    node[midway,anchor=north,text width=50pt,align=center] {Header};
+  \draw[decorate,decoration=brace] ([xshift=2pt,yshift=-2pt]entry.south east) -- ([yshift=-2pt]fde_count.south east)
+    node[midway,anchor=north,text width=50pt,align=center] {\texttt{fde\_count} entries};
+}

@@ -1,0 +1,11 @@
+\tikz[>={Latex}]{
+  \graph[tree layout,nodes={font={\footnotesize}}] {
+    "interestingCIE"/"[0x216c] CIE"[CIE=1] <- {
+      "interestingFDE"/"[0x218c] FDE"[FDE=1],
+      "[0x21bc] FDE"[FDE=1],
+      "[0x2210] FDE"[FDE=1],
+      "[0x2240] FDE"[FDE=1]
+    };
+  };
+  \node[ellipse,draw=magenta,opacity=0.2,inner sep=0pt,rotate fit=-75,fit=(interestingCIE)(interestingFDE)] {};
+}

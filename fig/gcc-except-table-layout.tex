@@ -1,0 +1,51 @@
+\tikz[
+  start chain=section going right,
+  start chain=tabEH going right,
+  start chain=tabCS going right,
+  start chain=tabTypeInfo going right,
+  node distance=0pt,
+  >={Latex},
+  every node/.style={
+        font={\footnotesize},
+        minimum height=20pt,
+  },
+  EH_table/.style={going_below_shade={yellow}{white}},
+  EH_table_part/.style={going_below_shade={magenta}{white}},
+  CS_table_part/.style={going_below_shade={cyan}{white}},
+  action_table_part/.style={going_below_shade={black}{white}},
+]{
+  % `.gcc_except_table` section
+  \node(EH_table1) [EH_table,text width=1in,on chain=section] {};
+  \node(EH_table2) [EH_table,text width=1in,on chain=section] {};
+  \node[text width=1in,on chain=section] {\ldots{}};
+
+  \draw[<-] (EH_table1.north west) -- ++(0pt,10pt) node[at end,anchor=south] {\footnotesize FDE xxx (\textcolor{cyan}{\ttfamily L} aug. data)};
+  \draw[<-] (EH_table2.north west) -- ++(0pt,10pt) node[at end,anchor=south] {\footnotesize FDE yyy};
+  \draw[decorate,decoration=brace] ([yshift=-2pt]EH_table1.south east) -- ([yshift=-2pt]EH_table1.south west)
+    node[midway,anchor=north,text width=1in,align=center] {Exception table};
+
+  % EH table
+  \node(EH_table1_hdr) [EH_table_part,on chain=tabEH] at ([yshift=-0.67in]EH_table1) {Header};
+  \node(EH_table1_CS) [EH_table_part,on chain=tabEH] {Call Site table};
+  \node(EH_table1_action) [EH_table_part,on chain=tabEH] {Action table};
+  \node(EH_table1_TI) [EH_table_part,on chain=tabEH] {TypeInfo table};
+
+  \draw[densely dotted,gray] (EH_table1.south west) -- (EH_table1_hdr.north west);
+  \draw[densely dotted,gray] (EH_table1.south east) -- (EH_table1_TI.north east);
+
+  % CallSite table
+  \node(CS_range) [CS_table_part,on chain=tabCS] at ([xshift=-0.75in,yshift=-0.67in]EH_table1_CS) {PC range};
+  \node(CS_landingPad) [CS_table_part,on chain=tabCS] {Landing pad};
+  \node(CS_actions) [CS_table_part,on chain=tabCS] {Actions};
+  \node(CS_ldots) [on chain=tabCS] {\ldots{}};
+
+  \draw[densely dotted,gray] (EH_table1_CS.south west) -- (CS_range.north west);
+  \draw[densely dotted,gray] (EH_table1_CS.south east) -- (CS_ldots.north east);
+
+  % TypeInfo table
+  \node(TI_typeInfos) [action_table_part,on chain=tabTypeInfo] at ([yshift=-0.67in]EH_table1_TI) {Type Infos};
+  \node(TI_exceptionSpecs) [action_table_part,on chain=tabTypeInfo] {Exception Specs};
+
+  \draw[densely dotted,gray] (EH_table1_TI.south west) -- (TI_typeInfos.north west);
+  \draw[densely dotted,gray] (EH_table1_TI.south east) -- (TI_exceptionSpecs.north east);
+}

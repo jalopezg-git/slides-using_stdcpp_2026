@@ -1,0 +1,29 @@
+\tikz[
+  start chain=c going above,node distance=0pt,
+  >={Latex},
+  every node/.style={font={\footnotesize}}
+]{
+  \node(prev_LR) [stack_frame_element={20pt}{black},on chain=c,opacity=0.25] {(pushed) LR};
+  \node(prev_FP) [stack_frame_element={20pt}{black},on chain=c,opacity=0.25] {(pushed) FP};
+  %
+  \draw[decorate,decoration=brace] ([xshift=-20pt]prev_LR.south west) -- ([xshift=-20pt,yshift=-1pt]prev_FP.north west)
+    node[midway,anchor=east,text width=50pt,align=center] {Prev. stack frame};
+
+  \node(X19) [stack_frame_element={20pt}{red},on chain=c] {(pushed) X19};
+  \node(X20) [stack_frame_element={20pt}{red},on chain=c] {(pushed) X20};
+  \node(LR) [stack_frame_element={20pt}{red},on chain=c] {(pushed) LR};
+  \node(FP) [stack_frame_element={20pt}{red},on chain=c] {(pushed) FP};
+  %
+  \draw[decorate,decoration=brace] ([xshift=-20pt]X19.south west) -- ([xshift=-20pt,yshift=1pt]FP.north west)
+    node[midway,anchor=east,text width=50pt,align=center] {Stack frame for {\ttfamily may\_throw()}};
+  \draw[->,densely dotted,black!50] ([xshift=-5pt]X19.south west) -- ++(0pt,1in)
+    node[midway,anchor=south,rotate=90] {decreasing addresses};
+
+  \draw[<-,densely dotted] (X19.south east) -- ++(10pt,0pt) node[at end,anchor=west] {CFA};
+  \draw[<-,densely dotted] (X20.south east) -- ++(10pt,0pt) node[at end,anchor=west] {CFA-8};
+  \draw[<-,densely dotted] (LR.south east) -- ++(10pt,0pt) node[at end,anchor=west] {CFA-16};
+  \draw[<-,densely dotted] (FP.south east) -- ++(10pt,0pt) node[at end,anchor=west] {CFA-24};
+  \draw[<-,densely dotted] (FP.north east) -- ++(10pt,0pt) node[at end,anchor=west] {CFA-32};
+  %
+  \draw[<-,densely dotted] (FP.north east) .. controls ++(0pt,10pt) .. +(20pt,20pt) node[at end,anchor=west] {SP};
+}

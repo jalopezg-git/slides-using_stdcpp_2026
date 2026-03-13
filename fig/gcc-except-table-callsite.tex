@@ -1,0 +1,36 @@
+\tikz[
+  start chain=actions going right,
+  node distance=20pt,
+  >={Latex},
+  every node/.style={font={\footnotesize},text width={},minimum height=0pt},
+  every label/.style={font={\tiny}},
+  every on chain/.style={join=by ->},
+  every join/.style={densely dotted,magenta!50},
+  action/.style={circle,fill=black,inner sep=2pt,label={below:#1}},
+]{
+  \node(CS) [call_site_table={4}{cyan},text width=1in,label={above:Call Site table (part of EH table)}] {%
+  Entry 1%
+  \nodepart{two}Entry 2%
+  \nodepart{three}$\vdots$%
+  \nodepart{four}Entry N};
+
+  % CallSite table entry
+  \node(CS1) [call_site_table={4}{cyan},text width=1in,right=0.5in of CS] {%
+  start = \texttt{0x55}
+  \nodepart{two}length = \texttt{0xFF}%
+  \nodepart{three}landingPad%
+  \nodepart{four}actionEntry%
+  };
+  \draw[densely dotted,gray] (CS.north east) -- (CS1.north west);
+  \draw[densely dotted,gray] (CS.text split east) -- (CS1.south west);
+  \draw[densely dotted,->] (CS1.three east) -- ++(0.5in, 0pt) node[at end,anchor=west]{To landing pad entry};
+  \draw[decorate,decoration=brace] ([xshift=2pt]CS1.north east) -- ([xshift=2pt]CS1.two split east)
+    node[midway,anchor=west,align=center] {PC range};
+
+  % Actions chain
+  \node(actionEntry) [action={catch \texttt{T}},on chain=actions] at ([xshift=0.5in]CS1.four east) {};
+  \node[action={cleanup},on chain=actions] {};
+  \node[action={\ldots{}},on chain=actions] {};
+  \node[action={(exception Spec \texttt{1})},on chain=actions] {};
+  \draw[densely dotted,magenta!50] (CS1.four east) -- (actionEntry);
+}

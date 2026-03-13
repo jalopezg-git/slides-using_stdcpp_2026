@@ -1,2 +1,287 @@
 % ==== Itanium-compliant EH: LSB (Linux Standard Base) ====
 \section{Itanium-compliant EH: LSB (Linux Standard Base)}
+\begin{frame}{Itanium-compliant EH: LSB (Linux Standard Base)}
+  \alert{Linux Standard Base Core Specification 3.1}\footnote{\url{https://refspecs.linuxbase.org/LSB_3.1.1/LSB-Core-generic/LSB-Core-generic/ehframechpt.html}}: 11.6. Exception Frames, says
+  \begin{itemize}
+  \item \textbf{Unwinder:} unwind tables (DWARF CFI-based)
+
+  \item \textbf{Personality routine:} LSDA (Language-Specific Data Area)
+  \end{itemize}
+
+  \begin{onlyenv}<2>
+    \TZoverlayLayer{}{\fontsize{32}{32}\selectfont\pill}
+  \end{onlyenv}
+\end{frame}
+
+\subsection{Unwind tables: What?}
+           {
+             \setbeamertemplate{background canvas}{%
+               \tikz[remember picture,overlay]\node[fit=(current page),top color=verdigris,bottom color=cerulean,shading angle=45]{};}
+             \setbeamercolor{alerted text}{fg=invforeground}
+             \setbeamercolor*{enumerate item}{fg=white}
+             \begin{frame}[plain,noframenumbering]
+               \centering
+               \vfill\textcolor{white}{\Large Unwind tables: What?}\vfill
+             \end{frame}
+           }
+
+\newsavebox{\TBLuwtable}
+\begin{lrbox}{\TBLuwtable}
+  \begin{tabular}{|c||c|c|c|c|c|c|c|c|c|c|c|c|}
+    \hline
+    \rowcolor{magenta!20!white!20}
+    \texttt{PC} & \texttt{LR (X30)} & \texttt{FP (X29)} & \texttt{X19} & \texttt{X20} & \texttt{X21} & \texttt{X22} & \texttt{X23} & \texttt{X24} & \ldots{} & \texttt{D12} & \texttt{D13} & \texttt{D14} \\
+    \hline
+    \hline
+    \cellcolor{black!12} 0x100000538 & --- & --- & --- & --- & --- & --- & --- & --- & \ldots{} & --- & --- & --- \\ \hline
+    \cellcolor{black!12} 0x10000053C & SP+8 & SP+0 & --- & --- & --- & --- & --- & --- & \ldots{} & --- & --- & --- \\ \hline
+    \cellcolor{black!12} 0x100000540 & SP+8 & SP+0 & SP+24 & SP+16 & --- & --- & --- & --- & \ldots{} & --- & --- & --- \\ \hline
+    \cellcolor{black!12} 0x100000544 & SP+8 (FP+8) & SP+0 (FP+0) & SP+24 (FP+24) & SP+16 (FP+16) & --- & --- & --- & --- & \ldots{} & --- & --- & --- \\ \hline
+    \cellcolor{black!12} 0X100000548 & SP+8 (FP+8) & SP+0 (FP+0) & SP+24 (FP+24) & SP+16 (FP+16) & --- & --- & --- & --- & \ldots{} & --- & --- & --- \\ \hline
+    \cellcolor{black!12} 0x10000054C & SP+8 (FP+8) & SP+0 (FP+0) & SP+24 (FP+24) & SP+16 (FP+16) & --- & --- & --- & --- & \ldots{} & --- & --- & --- \\ \hline
+    \multicolumn{13}{c}{\ldots{}} \\ \hline
+    \cellcolor{black!12} 0x100000554 & SP+8 (FP+8) & SP+0 (FP+0) & SP+24 (FP+24) & SP+16 (FP+16) & --- & --- & --- & --- & \ldots{} & --- & --- & --- \\ \hline
+    \cellcolor{black!12} 0x100000558 & --- & --- & --- & --- & --- & --- & --- & --- & \ldots{} & --- & --- & --- \\ \hline
+    \cellcolor{black!12} 0x10000055C & --- & --- & --- & --- & --- & --- & --- & --- & \ldots{} & --- & --- & --- \\ \hline
+    \hline
+    \multicolumn{13}{c}{(extract~of) \texttt{\_Z9may\_throwRKSt6vectorIiSaIiEE}} \\
+  \end{tabular}
+\end{lrbox}
+\begin{frame}[fragile]{Unwind tables}
+  \underline{\bfseries Conceptually:} a HUGE table that specifies how to unwind any stack frame.
+  \vfill
+  \resizebox{0.9\textwidth}{!}{\usebox{\TBLuwtable}}
+
+  \begin{onlyenv}<2->
+    \TZoverlayLayer{}{
+      \hfill\includegraphics[width=0.4\textwidth]{img/may_throw-armv8a-prologue.png}
+    }
+  \end{onlyenv}
+
+  \begin{onlyenv}<3->
+    \overlayLayer{\alert{Space and time consuming!} $\rightarrow$ Compressed form needed}
+  \end{onlyenv}
+\end{frame}
+
+\begin{frame}{DWARF CFI (Call Frame Information): CFA}
+  \begin{columns}
+    \column{0.5\textwidth}
+    \begin{onlyenv}<1>
+      \begin{itemize}
+      \item DWARF\footnote{\url{https://dwarfstd.org/doc/DWARF5.pdf}}, {\S}6.4, specifies how to encode compressed form: \underline{Call Frame Information}
+
+      \item Stack frames are identified by their \alert{CFA} (Canonical Frame Address)
+        \begin{itemize}
+        \item Typically, \texttt{SP} at the call site in the prev. frame
+          \includegraphics[width=\columnwidth]{img/may_throw-armv8a-bl.png}
+        \end{itemize}
+      \end{itemize}
+    \end{onlyenv}
+
+    \begin{onlyenv}<2>
+      \begin{center}
+        \includegraphics[width=\columnwidth]{img/may_throw-armv8a-prologue.png}
+      \end{center}
+    \end{onlyenv}
+
+    \column{0.5\textwidth}
+    \begin{center}
+      \resizebox{0.8\columnwidth}{!}{\input{fig/stack-frame-cfa}}
+    \end{center}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{DWARF CFI (Call Frame Information): CFI instructions (1)}
+  \begin{columns}
+    \column{0.5\textwidth}
+    \begin{center}
+      \includegraphics[width=\columnwidth]{img/may_throw-armv8a-prologue.png}
+    \end{center}
+
+    \column{0.5\textwidth}
+    Usually, CFI instructions (opcodes) specify\ldots{}
+    \begin{itemize}
+    \item An initial CFA rule (after prologue)\\
+      $\rightarrow$~\inlineCode{DW\_CFA\_def\_cfa\_offset}
+    \item CFA-relative position of callee-saved, \texttt{FP}, and return registers (\texttt{LR})\\
+      $\rightarrow$~\inlineCode{DW\_CFA\_offset}
+      \bigskip
+
+    \item And\ldots{} corrections of the CFA\\
+      $\rightarrow$~\inlineCode{DW\_CFA\_def\_cfa}\\
+      $\rightarrow$~\inlineCode{DW\_CFA\_def\_cfa\_offset}\\
+      $\rightarrow$~\inlineCode{DW\_CFA\_advance\_loc}
+    \end{itemize}
+  \end{columns}
+
+  \begin{onlyenv}<2->
+    \overlayLayer{\texttt{FP}-based CFA rule is preferred!}
+  \end{onlyenv}
+\end{frame}
+
+\subsection{Unwind tables: Where?}
+           {
+             \setbeamertemplate{background canvas}{%
+               \tikz[remember picture,overlay]\node[fit=(current page),top color=verdigris,bottom color=cerulean,shading angle=45]{};}
+             \setbeamercolor{alerted text}{fg=invforeground}
+             \setbeamercolor*{enumerate item}{fg=white}
+             \begin{frame}[plain,noframenumbering]
+               \centering
+               \vfill\textcolor{white}{\Large Unwind tables: Where?}\vfill
+             \end{frame}
+           }
+
+\begin{frame}[fragile]{\texttt{.eh\_frame} and friends}
+  Unwind information is serialized to some sections in the executable format, e.g.
+  %
+  \vfill
+  \begin{lstlisting}[style=c++]
+$ llvm-objdump --section-headers ./case_study
+
+./case_study:	file format elf64-x86-64
+
+Sections:
+Idx Name               Size     VMA              Type
+  0                    00000000 0000000000000000
+`\ldots`
+ 16 `\lsthl{.eh\_frame\_hdr}`      00000044 00000000000020ec DATA
+ 17 `\lsthl{.eh\_frame}`          00000164 0000000000002130 DATA
+ 18 `\lsthl{.gcc\_except\_table}`  0000007c 0000000000002294 DATA
+`\ldots`
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}{\texttt{.eh\_frame}: CIEs / FDEs}
+  \begin{columns}
+    \column{0.5\textwidth}
+    \begin{itemize}
+    \item A collection of ``CFI'' records:
+      \begin{itemize}
+      \item CIE (Common Information Entry)
+      \item FDE (Frame Description Entry)
+      \end{itemize}
+      \bigskip
+
+    \item Any number of FDEs can follow a CIE
+    \end{itemize}
+
+    \column{0.5\textwidth}
+    \begin{onlyenv}<1>
+      \resizebox{\columnwidth}{!}{\input{fig/cie-fde-hier}}
+    \end{onlyenv}
+
+    \begin{onlyenv}<2>
+      \underline{CIE (Common Information Entry)}\\[1ex]
+      \begin{itemize}
+      \item Code and Data Alignment factors
+      \item Return address (DWARF) register
+      \item \alert{Augmentation string} [+ data + length]
+        \begin{itemize}
+        \item \inlineCode{z}: has data
+        \item \inlineCode{L}: has LSDA
+        \item \inlineCode{P}: has personality
+        \end{itemize}
+
+      \item Initial CFI `program'
+      \end{itemize}
+    \end{onlyenv}
+
+    \begin{onlyenv}<3>
+      \underline{FDE (Frame Description Entry)}\\[1ex]
+      \begin{itemize}
+      \item PC range
+      \item Augmentation data
+      \item CFI `program`
+      \end{itemize}
+    \end{onlyenv}
+  \end{columns}
+
+  \begin{onlyenv}<4>
+    \overlayLayer{\resizebox{0.54\textwidth}{!}{\input{fig/cie-fde}}}
+  \end{onlyenv}
+\end{frame}
+
+\begin{frame}{\texttt{.eh\_frame}: Encoding}
+  \vfill
+  \linkButton{https://refspecs.linuxbase.org/LSB_3.1.1/LSB-Core-generic/LSB-Core-generic/ehframechpt.html}{See \texttt{LSB\_3.1.1/LSB-Core-generic/LSB-Core-generic/ehframechpt.html}}
+  \vfill
+\end{frame}
+
+\begin{frame}{\texttt{.eh\_frame\_hdr}: Accelerating lookup}
+  \texttt{.eh\_frame\_hdr}: binary search table over FDEs in \texttt{.eh\_frame}.
+  %
+  \vfill
+  \begin{center}
+    \resizebox{\textwidth}{!}{\input{fig/eh-frame-hdr}}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Compact Unwind: \texttt{\_\_unwind\_info} (macOS / iOS only)}
+  \alert{Very efficient} encoding of unwind information (given some assumptions)!
+  %
+  \vfill
+  \begin{columns}
+    \column{0.5\textwidth}
+    \underline{\bfseries Good:}\\
+
+    \column{0.5\textwidth}
+    \underline{\bfseries Bad:}\\
+  \end{columns}
+  \begin{columns}
+    \column{0.5\textwidth}
+    \begin{itemize}
+    \item Can encode a range's unwind-info in 32-bits (most of the time)
+    \item Replaces both \texttt{.eh\_frame} and \texttt{.eh\_frame\_hdr}
+    \end{itemize}
+
+    \column{0.5\textwidth}
+    \begin{itemize}
+    \item Only for Apple platforms
+    \end{itemize}
+  \end{columns}
+\end{frame}
+
+\subsection{LSDA (for the personality routine)}
+           {
+             \setbeamertemplate{background canvas}{%
+               \tikz[remember picture,overlay]\node[fit=(current page),top color=verdigris,bottom color=cerulean,shading angle=45]{};}
+             \setbeamercolor{alerted text}{fg=invforeground}
+             \setbeamercolor*{enumerate item}{fg=white}
+             \begin{frame}[plain,noframenumbering]
+               \centering
+               \vfill\textcolor{white}{\Large LSDA (for the personality routine)}\vfill
+             \end{frame}
+           }
+
+\begin{frame}{LSDA: \texttt{.gcc\_except\_table}: Exception tables}
+  \begin{center}
+    \resizebox{0.75\textwidth}{!}{\input{fig/gcc-except-table-layout}}
+  \end{center}
+  \vfill
+  \begin{itemize}
+  \item \textbf{Type Infos:} pointers to RTTI type information (\texttt{0} == \inlineCode{catch (...)})
+    \medskip
+
+  \item Actual encoding: \linkButton{https://github.com/llvm/llvm-project/blob/main/libcxxabi/src/cxa_personality.cpp\#L96}{\small See \texttt{llvm-project/blob/main/libcxxabi/src/cxa\_personality.cpp}}
+  \end{itemize}
+
+  \begin{onlyenv}<2->
+    \overlayLayer{
+      \\[0.5in] \input{fig/gcc-except-table-callsite}
+      \vspace{0.5in}
+    }
+  \end{onlyenv}
+\end{frame}
+
+\begin{frame}[fragile]{C++ exceptions trivia (5)}
+  \textbf{Q5: Can I catch exceptions even if \inlineCode{-fno-rtti} is there (Y / N / Neutral?)}
+
+  \begin{onlyenv}<2>
+    \overlayLayer{\MAYBE~~{\large\thinking}\\[1ex]
+      \begin{itemize}
+      \item Compiler generates minimal RTTI for the caught types
+      \item But might be fragile\footnote{https://github.com/llvm/llvm-project/issues/66117}!
+      \end{itemize}
+    }
+  \end{onlyenv}
+\end{frame}
