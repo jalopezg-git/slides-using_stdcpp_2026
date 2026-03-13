@@ -1,0 +1,21 @@
+\tikz[
+  start chain=c going below,node distance=0pt,
+  >={Latex},
+  annotation/.style={anchor=west,text width=48pt},
+  annotation edge/.style={->,densely dotted},
+  every node/.style={font={\footnotesize}},every label/.style={font={\footnotesize}}
+]{
+  \node(may_throw) [stack_frame={\#0}{black},on chain=c] {may\_throw()};
+  \node(do_something_that_needs_cleanups) [stack_frame={\#1}{red},on chain=c] {do\_something\_that\_needs\_\\ cleanups()};
+  \node(catches_and_rethrows) [stack_frame={\#2}{red},on chain=c] {catches\_and\_rethrows()};
+  \node(main) [stack_frame={\#3}{red},on chain=c] {main()};
+
+  \draw[annotation edge] (may_throw.east) .. controls +(15pt,-30pt) .. (catches_and_rethrows.east)
+    node[annotation,very near start] {throws}
+    node[annotation,very near end] {catches all};
+  \draw[annotation edge] (catches_and_rethrows.east) .. controls +(15pt,-15pt) .. (main.east)
+    node[annotation,very near start] {rethrows}
+    node[annotation,very near end] {catches\\ {\ttfamily std::runtime\_error}};
+
+  \node[below=10pt of main] {\textcolor{red!50!black!50}{\large$\bullet$}~needs cleanup};
+}
