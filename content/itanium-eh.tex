@@ -1,2 +1,208 @@
 % ==== Itanium ABI (clang / gcc): What does it say about EH? ====
 \section{Itanium ABI (clang / gcc): What does it say about EH?}
+\begin{frame}{Itanium C++ ABI: EH}
+  \begin{block}{Itanium C++ ABI: Exception Handling}
+    \begin{itemize}
+    \item Level I (Base ABI): language-independent (e.g. unwinder interface)
+    \item Level II (C++ ABI): C++-specific (e.g. exception layout, allocation, \ldots{})
+      \medskip
+
+    \item Level III (Suggested Implementation): some useful considerations; not seen here
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Level I (Base ABI)}
+  \begin{block}{Definitions}
+    \begin{itemize}
+    \item \alert{\bfseries Stack unwind:} the (controlled) process of 'reverting' stack frames
+      \begin{itemize}
+      \item Two-phase process: \textbf{search} and \textbf{cleanup}.
+      \end{itemize}
+      \pause
+
+    \item At each step: call personality routine associated w/ each function in the call stack
+      \begin{itemize}
+      \item \alert{\bfseries Personality routine:} interface between system unwinder library and language-specific EH semantics -- guides unwind to a landing pad.
+        \begin{center}
+          \resizebox{0.5\textwidth}{!}{\input{fig/unwind-personality-rel}}
+        \end{center}
+
+      \item \alert{\bfseries Landing pad:} user-code that \underline{catches} a given exception type OR performs \underline{clean-up}
+      \end{itemize}
+      \medskip
+      \pause
+
+    \item Unwinder: runtime component able to perform stack unwind
+    \end{itemize}
+  \end{block}
+
+  \begin{onlyenv}<4->
+    \overlayLayer{\begin{itemize}
+      \item \texttt{libgcc\_s}: GCC-based toolchains
+      \item \texttt{libunwind}: provided by LLVM / compiler-rt; can be used by clang
+    \end{itemize}}
+  \end{onlyenv}
+\end{frame}
+
+\newsavebox{\LSTunwindexception}
+\begin{lrbox}{\LSTunwindexception}
+  \begin{lstlisting}[style=c++,basicstyle={\ttfamily\footnotesize},linewidth=0.8\textwidth]
+  struct _Unwind_Exception {
+    uint64	 exception_class; // 4 MSB = vendor
+                                  // 4 LSB = lang (C++ == "C++\0")
+    _Unwind_Exception_Cleanup_Fn exception_cleanup;
+    uint64	 private_1;       // Unwinder-internal
+    uint64	 private_2;
+  };
+  \end{lstlisting}
+\end{lrbox}
+\begin{frame}[fragile]{Level I (Base ABI): Raising an exception}
+  \begin{itemize}
+  \item \inlineCode{\_Unwind\_RaiseException}: \underline{language-independent} ABI function to raise an exception%
+    \footnote{There is also \texttt{\_Unwind\_ForcedUnwind}, used for SJLJ / thread cancellation; not seen today!}
+    \vfill
+    \begin{lstlisting}[style=c++,basicstyle={\ttfamily\footnotesize}]
+struct _Unwind_Exception;
+
+_Unwind_Reason_Code `\lsthl{\_Unwind\_RaiseException}`(struct _Unwind_Exception *exception_object);
+    \end{lstlisting}
+
+  \end{itemize}
+
+  \begin{onlyenv}<2>
+    \overlayLayer{Language-independence!  \inlineCode{\_Unwind\_Exception} is $\sim$ an exception 'header'\ldots{}
+      \usebox{\LSTunwindexception}
+    }
+  \end{onlyenv}
+\end{frame}
+
+\begin{frame}{Level I (Base ABI): Phase 1 (Search)}
+  \begin{columns}
+    \column{0.5\textwidth}
+    \begin{itemize}
+    \item Find a stack frame that claims to \underline{catch} the thrown type
+      \begin{itemize}
+      \item Unwinder calls personality routine w/ \inlineCode{\_UA\_SEARCH\_PHASE} at each step
+      \item Ignores cleanup landing pads
+      \end{itemize}
+
+    \item \textbf{Stack in NOT unwound!}
+    \item If found ($Catch_{T}$) $\rightarrow$ Phase 2; else Phase 1 returns \inlineCode{\_URC\_END\_OF\_STACK} $\rightarrow$ call \texttt{std::terminate()}
+    \end{itemize}
+
+    \column{0.5\textwidth}
+    \begin{center}
+      \resizebox{0.9\columnwidth}{!}{\input{fig/call-stack}}
+    \end{center}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Level I (Base ABI): Phase 2 (Cleanup)}
+  \begin{columns}
+    \column{0.5\textwidth}
+    \begin{itemize}
+    \item Unwind one frame at a time, until reaching $Catch_{T}$'s frame
+      \begin{itemize}
+      \item Personality routine is called w/ \inlineCode{\_UA\_CLEANUP\_PHASE}
+      \item \ldots{}Stopping at cleanup landing pads!
+      \end{itemize}
+      \bigskip
+
+    \item \textbf{Stack IS unwound!}
+
+    \item Resume at $Catch_{T}$
+    \end{itemize}
+
+    \column{0.5\textwidth}
+    \begin{center}
+      \resizebox{0.9\columnwidth}{!}{\input{fig/call-stack}}
+    \end{center}
+  \end{columns}
+\end{frame}
+
+\newsavebox{\LSTcxaexception}
+\begin{lrbox}{\LSTcxaexception}
+  \begin{lstlisting}[style=c++,basicstyle={\ttfamily\footnotesize},linewidth=0.8\textwidth]
+    struct __cxa_exception {
+      std::type_info *	 exceptionType;
+      void               (*exceptionDestructor) (void *);
+      unexpected_handler unexpectedHandler;  //  .- At throw point
+      terminate_handler	 terminateHandler;   // ,
+      __cxa_exception *	 nextException;
+
+      int         handlerCount;
+      int         handlerSwitchValue;   // .
+      const char *actionRecord;         //  |
+      const char *languageSpecificData; //  |- Cached
+      void *      catchTemp;            //  |
+      void *      adjustedPtr;          // ,
+
+      _Unwind_Exception	unwindHeader;
+    };
+  \end{lstlisting}
+\end{lrbox}
+\begin{frame}[fragile]{Level II (C++ ABI)}
+  Called from throwing code:
+  \begin{itemize}
+  \item \inlineCode{\_\_cxa\_allocate\_exception(size\_t thrown\_size)}: allocates exception object of the given size
+
+  \item \inlineCode{\_\_cxa\_throw(void *except, std::type\_info *tinfo, void (*dtor)(void *))}: C++ ABI function for throwing an exception!
+  \end{itemize}
+
+  Called at landing pad:
+  \begin{itemize}
+  \item \inlineCode{\_\_cxa\_begin\_catch(void *exceptionObject)}: book-keeping (increment refcount, etc.).  Returns enclosing \texttt{\_\_cxa\_exception}.
+
+  \item \inlineCode{\_\_cxa\_end\_catch()}: book-keeping (decrement refcount; destroy if 0)
+
+  \item \inlineCode{\_\_cxa\_rethrow()}: isn't it obvious?
+
+  \end{itemize}
+
+  \begin{onlyenv}<2>
+    \overlayLayer{\inlineCode{\_\_cxa\_exception} looks like\ldots{}
+      \usebox{\LSTcxaexception}
+    }
+  \end{onlyenv}
+
+  \begin{onlyenv}<3>
+    \overlayLayer{
+      \begin{center}
+        \includegraphics[width=0.76\textwidth]{img/libcxxabi-__cxa_exception-layout.png}
+        \linkButton{https://github.com/llvm/llvm-project/blob/main/libcxxabi/src/cxa_exception.cpp}{See \texttt{llvm-project:libcxxabi/src/cxa\_exception.cpp}}
+      \end{center}
+    }
+  \end{onlyenv}
+
+  \begin{onlyenv}<4>
+    \overlayLayer{
+      \begin{center}
+        \includegraphics[width=0.76\textwidth]{img/godbolt-__cxa_throw.png}\\
+        \godbolt{https://godbolt.org/z/Gz148x4Pf}
+      \end{center}
+    }
+  \end{onlyenv}
+
+  \begin{onlyenv}<5>
+    \overlayLayer{
+      \begin{center}
+        \includegraphics[width=0.76\textwidth]{img/libcxxabi-__cxa_throw.png}
+        \linkButton{https://github.com/llvm/llvm-project/blob/main/libcxxabi/src/cxa_exception.cpp}{See \texttt{llvm-project:libcxxabi/src/cxa\_exception.cpp}}
+      \end{center}
+    }
+  \end{onlyenv}
+\end{frame}
+
+\begin{frame}{Level II (C++ ABI)}
+  \begin{block}{Level II also specifies\ldots{}}
+    \begin{itemize}
+    \item exception object layout
+
+    \item common agreements for personality routine
+    \end{itemize}
+  \end{block}
+  \vfill
+
+  BUT, it does \underline{NOT} specify where/how unwind information is stored \alert{(!)}
+\end{frame}

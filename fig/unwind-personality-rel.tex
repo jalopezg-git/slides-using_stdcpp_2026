@@ -1,0 +1,12 @@
+\tikz[
+  >={Latex},
+  component/.style={draw,ellipse,fill=white,text width=1.25in,align=center,minimum height=30pt}
+]{
+  \node(unwinder) [component] {Unwinder};
+  \node(personality) [component,right=1in of unwinder] {Personality routine};
+  %
+  \draw[->] (unwinder.north) .. controls +(80pt,15pt) .. (personality.north)
+    node[midway,anchor=south] {\lsthl{Is there a landing pad for this type?}};
+  \draw[<-] (unwinder.south) .. controls +(80pt,-15pt) .. (personality.south)
+    node[midway,anchor=north] {Yes / not in this stack frame};
+}
