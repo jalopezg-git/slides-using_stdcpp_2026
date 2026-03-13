@@ -1,0 +1,66 @@
+% ==== C++ exceptions trivia ====
+
+\begin{frame}[fragile]{C++ exceptions trivia (1)}
+  \textbf{Q1: Myth or truth: exception handling is slow (Y / N / Neutral?)}
+
+  \begin{onlyenv}<2>
+    \overlayLayer{\MAYBE~~{\large\thinking} | Most of the time it's \YES, but note that\\[1ex]
+      \begin{itemize}
+      \item It's usually okay for \alert{exceptional} control flow
+      \item Some representations / implementations may yield faster dispatch
+      \end{itemize}
+    }
+  \end{onlyenv}
+\end{frame}
+
+\begin{frame}[fragile]{C++ exceptions trivia (2)}
+  \textbf{Q2: Exceptions can \textit{propagate} through \inlineCode{-fno-exceptions} code (Y / N / Neutral?)}
+  \begin{lstlisting}[style=c++]
+    // main.cpp
+    void do_throw(void) { throw 0; }
+    extern void may_throw(int);
+
+    int main(int argc, char *argv[]) {
+      try { may_throw(argc); } catch (...) {}
+      return 0;
+    }
+
+    // fnoexceptions.cpp (compiled w/ `-fno-exceptions`)
+    extern void do_throw(void);
+    void may_throw(int argc) { if (argc != 2) do_throw(); }
+  \end{lstlisting}
+
+  \begin{onlyenv}<2>
+    \overlayLayer{\YES~~{\large\OK}\\[1ex]
+      \begin{itemize}
+      \item \inlineCode{.cfi\_xxx} assembler directives are still generated $\rightarrow$ ability to unwind those frames
+      \item Participate in \textbf{unwind} but NOT in \textbf{EH} (cannot throw or catch).
+      \end{itemize}
+    }
+  \end{onlyenv}
+\end{frame}
+
+\begin{frame}[fragile]{C++ exceptions trivia (3)}
+  \textbf{Q3: C code can be compiled with \inlineCode{-fexceptions} (Y / N / Neutral?)}
+
+  \begin{onlyenv}<2>
+    \overlayLayer{\YES~~{\large\OK}\\[1ex]
+      \begin{itemize}
+      \item \inlineCode{.cfi\_xxx} assembler directives are still generated $\rightarrow$ ability to unwind those frames
+      \end{itemize}
+    }
+  \end{onlyenv}
+\end{frame}
+
+\begin{frame}[fragile]{C++ exceptions trivia (4)}
+  \textbf{Q4: Exceptions are appropriate for embedded systems (Y / N / Neutral?)}
+
+  \begin{onlyenv}<2>
+    \overlayLayer{\MAYBE~(depends)~~{\large\thinking} | \textbf{Rationale:} EH is based on stack unwinding\ldots{}\\[1ex]
+      \begin{itemize}
+      \item Non-deterministic (unbound) stack unwinding\footnote{There are, however, some proposals to address this.}
+      \item Additional bloat, if unwind / EH logic is statically linked
+      \end{itemize}
+    }
+  \end{onlyenv}
+\end{frame}
