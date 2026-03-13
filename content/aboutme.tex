@@ -1,0 +1,34 @@
+% ==== About me ====
+\begin{frame}{About me}
+  \begin{center}
+    \tikz{\path node(pic) {\includegraphics[width=.75in]{img/my-picture.png}}
+      node(name) [right=0pt of pic,yshift=1.25em,font={\bfseries},text width=2.5in] {\underline{Javier Lopez-Gomez}}
+      node[below=0pt of name,text width=2.5in] {\small%
+        \faGithub~\href{https://github.com/jalopezg-git}{jalopezg-git}\hfill
+        \faGlobe~\href{https://jalopezg.dev/}{https://jalopezg.dev/}\\
+        \faEnvelope~javier.lopez.gomez AT proton.me};}\\
+  \end{center}
+
+  \vfill
+  \begin{itemize}
+  \item 2017--2020: PhD in Computer Science and Technology (ARCOS-UC3M)
+    \begin{itemize}
+    \item Prototype implementation of the former P0542R5 proposal for C++ contracts
+    \item @ CERN (2019): definition shadowing in the \texttt{cling} C++ interpreter
+    \end{itemize}
+    \medskip
+
+  \item 2020--2023: Senior Applied Fellow (SoFTware for experiments group, CERN)
+    \begin{itemize}
+    \item RNTuple columnar storage, \texttt{cling} maintenance\ldots{}
+    \end{itemize}
+    \medskip
+
+  \item \textbf{2024--(today): Senior Compiler Engineer (Zimperium, Inc.)}
+    \begin{itemize}
+    \item Binary-to-binary obfuscation solution
+    \end{itemize}
+
+  \item \textbf{2025--(today): Voting member of WG21 (ISOCPP)}
+  \end{itemize}
+\end{frame}

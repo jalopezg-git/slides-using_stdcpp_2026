@@ -1,0 +1,133 @@
+\makeatletter\let\ifGm@compatii\relax\makeatother
+\RequirePackage{atbegshi}
+\documentclass[final,hyperref={pdfpagemode=FullScreen},aspectratio=169,10pt]{beamer}
+
+\usepackage[english]{babel}
+\usepackage{lmodern,hyperref,amsmath,amssymb,pdftexcmds,listings,lstautogobble,tikz,ulem,xspace,ifthen}
+\usepackage{appendixnumberbeamer}
+\usepackage[utf8]{luainputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fontawesome5}
+\usepackage{emoji}
+\usepackage{qrcode}
+\usepackage[export]{adjustbox}
+%\ttfamily\DeclareFontShape{T1}{lmtt}{m}{it}
+%                          {<->sub*lmtt/m/sl}{}
+
+\input{beamer-settings}
+\input{sticky-notes}
+
+\def\endpageFootnote{%
+}
+\def\thisPresentationURL{https://github.com/jalopezg-git/slides-using_stdcpp_2026/blob/master/main.pdf}
+
+\hypersetup{final,
+	        plainpages=false,
+	        %hyperfootnotes=false,
+	        colorlinks=true,
+	        linkcolor=cerulean,
+	        urlcolor=black,
+	        citecolor=cerulean,
+	        pdfpagemode=UseOutlines,
+	        pdfstartview=FitH,
+	        pdfborder={0 0 0}}
+
+% ---- pgfplots
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+% ---- tikz
+\usepackage{tikz}
+\usetikzlibrary{fit,matrix,positioning,chains,arrows.meta,shapes.multipart,shapes.geometric,pgfplots.groupplots,graphs,graphdrawing,shadows.blur}
+\usegdlibrary{trees}
+\pgfdeclarelayer{background}\pgfsetlayers{background,main}
+
+\def\TZoverlayLayer#1#2{\tikz[remember picture,overlay]\node[at=(current page.center),%
+                                  text width=0.9\textwidth,minimum height=0.5\textheight,align=center,%
+                                  #1]{#2};}
+\def\overlayLayer#1{\TZoverlayLayer{draw=black,fill=white}{#1}}
+\tikzset{
+        tag/.style={white,draw=#1!50!black!70,fill=#1!50!black!50,rounded corners,minimum width=0,minimum height=0,font={}}
+}
+
+% ---- listings
+\usepackage{listing,lstautogobble}
+\definecolor{lstkeyword}{HTML}{01497c}
+\definecolor{lststring}{HTML}{a4133c}
+\definecolor{lstcomment}{HTML}{718355}
+\definecolor{lsthl}{HTML}{ffd166}
+\definecolor{lstinline}{HTML}{D62B53}
+\lstset{
+    escapechar=`,
+    tabsize=3,
+    breaklines=true,
+    showstringspaces=false,
+    basicstyle={\ttfamily\small},
+    keywordstyle={\color{lstkeyword}\bfseries},
+    commentstyle={\color{lstcomment}},
+    stringstyle={\color{lststring}},
+}
+\lstdefinestyle{c++}{
+    language=c++,
+    backgroundcolor=\color{black!6},
+%    keywordstyle=[2]{\color{lstkeyword}\bfseries},
+%    morekeywords=[2]{},
+}
+\lstdefinestyle{bash}{
+    language=bash,
+    backgroundcolor=\color{black!6},
+}
+
+\def\lsthl#1{\raisebox{-.1ex}{\tikz\node[inner sep=0pt,fill=lsthl]{#1};}}
+\def\inlineCode#1{\raisebox{-.7ex}{\tikz{\node[font={\footnotesize\ttfamily},rounded corners,color=lstinline,fill=black!6,minimum height=0]{#1};}}}
+
+\def\NO{\raisebox{-0.5ex}{\tikz\node[tag=red]{NO};}}
+\def\MAYBE{\raisebox{-0.5ex}{\tikz\node[tag=yellow!50!white]{MAYBE};}}
+\def\YES{\raisebox{-0.5ex}{\tikz\node[tag=green]{YES};}}
+
+\def\facepalm{\emoji{person-facepalming}}
+\def\worried{\emoji{worried-face}}
+\def\thinking{\emoji{thinking-face}}
+\def\OK{\emoji{check-mark-button}}
+\def\NotOK{\emoji{cross-mark}}
+\def\question{\emoji{red-question-mark}}
+\def\smile{\emoji{slightly-smiling-face}}
+\def\explodingHead{\emoji{exploding-head}}
+\def\faceWithMonocle{\emoji{face-with-monocle}}
+\def\womanDancing{\emoji{woman-dancing}}
+
+\def\linkButton#1#2{\tikz\node[draw=teal!50!black!50,minimum height=0,%
+        top color=white,bottom color=teal!50!black!20,%
+        rounded corners]{\raisebox{.9em}{\rotatebox{-90}{$\triangle$}} ~\href{#1}{#2}};}
+\def\godbolt#1{\linkButton{#1}{See in Godbolt}}
+
+\title{You \texttt{throw}; I'll \texttt{try} to \texttt{catch} it}
+\subtitle{A (low-level) journey through exception handling}
+\author[Javier López-Gómez]{Javier López-Gómez}
+\date{\texttt{using std::cpp}, 2026-03-18}
+
+\begin{document}
+\maketitle
+\input{content/aboutme}
+\input{content/acknowledgements}
+\input{content/cpp-trivia}
+\input{content/case-study}
+
+\begin{frame}{Contents}
+  \tableofcontents[hidesubsections]
+\end{frame}
+
+\input{content/introduction}
+\input{content/itanium-eh}
+\input{content/itanium-eh-lsb}
+\input{content/itanium-eh-step}
+\input{content/closing}
+
+\input{content/resources}
+\makeendpage
+
+% ==== APPENDIX ====
+\input{content/backup}
+
+\appendix
+\end{document}
