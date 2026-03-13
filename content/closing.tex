@@ -1,2 +1,38 @@
-% ==== Conclusion ====
-\section{Conclusion}
+% ==== Wrapping up ====
+\section{Wrapping up}
+\begin{frame}{A short note on MSVC / Windows EH}
+  \begin{block}{SEH}
+    SEH (Structured Exception Handling): frame-based EH in Windows.\\[1ex]
+    \begin{itemize}
+    \item x86\_64 SEH: somewhat similar to what has been described here
+      \begin{itemize}
+      \item Exception table (\texttt{.pdata}) $\sim$ \texttt{.eh\_frame} section
+      \item Unwind ops $\sim$ DWARF CFI
+      \end{itemize}
+      \bigskip
+
+    \item x86 SEH: different approach\ldots{}
+      \begin{itemize}
+      \item Handlers kept in a linked list pointed to by \texttt{fs} register
+      \item Function prologue (epilogue) registers (unregisters) handler
+      \end{itemize}
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Ideas to take home}
+  \begin{itemize}
+  \item Exception handling is a \textbf{complex} (but \textbf{amazing}!) topic~{\Large\smile}
+    \begin{itemize}
+      \item \textbf{Many ABI specs} (Itanium C++ ABI, architecture ABI, LSB, DWARF\ldots{})
+    \end{itemize}
+
+  \item Per Itanium C++ ABI, unwinder and personality routine collaborate together~{\Large\womanDancing}
+    \bigskip
+
+  \item Unwind info / exception tables is stored in specific sections in the executable image
+    \bigskip
+
+  \item EH is not generally fast, but mostly okay for \textit{exceptional} control flow!
+  \end{itemize}
+\end{frame}
