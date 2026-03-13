@@ -1,2 +1,99 @@
 % ==== Introduction ====
 \section{Introduction}
+\begin{frame}{Exception Handling: definition (1)}
+  \begin{block}{Definition from Wikipedia, ``Exception handling'' article}
+    \begin{center}
+      ``{\ttfamily\small Exception handling is the process of responding to the occurrence of exceptions \textemdash{}anomalous or exceptional conditions requiring special processing\textemdash{} during the execution of a program.  In general, an exception breaks the normal flow of execution and executes a pre-registered exception handler.}''
+    \end{center}
+  \end{block}
+  \vfill
+
+  \begin{itemize}
+    \item \textbf{In programming languages:} an exception object is prepared, which is then said to be \inlineCode{throw}n; control flow transfers to the inner-most \inlineCode{catch} block that can handle it
+  \end{itemize}
+
+  \begin{onlyenv}<2>
+    \TZoverlayLayer{}{\fontsize{32}{32}\selectfont\smile}
+  \end{onlyenv}
+\end{frame}
+
+\begin{frame}{Exception Handling: definition (2)}
+  \begin{columns}
+    \column{0.5\textwidth}
+    Roughly, for C++\ldots{}
+    \begin{enumerate}
+    \item \textbf{User code:} Allocate memory for exception of type $T$ and throw it.
+    \item \textbf{Runtime:} Identify the proper catch block ($Catch_T$).
+    \item \textbf{Runtime:} Undo (unwind) affected stack frames; clean up as needed (dtors)
+    \item \textbf{Runtime:} Transfer control to $Catch_T$.
+    \end{enumerate}
+
+    \column{0.5\textwidth}
+    \begin{center}
+      \input{fig/call-stack}
+    \end{center}
+  \end{columns}
+
+  \begin{onlyenv}<2>
+    \overlayLayer{\begin{itemize}
+      \item This is \alert{ABI}-dependent!
+      \item Runtime needs additional information emitted by the compiler!
+    \end{itemize}}
+  \end{onlyenv}
+\end{frame}
+
+\begin{frame}{Let's talk about ABIs}
+  \begin{block}{Informal definition}
+    An ABI (Application Binary Interface) defines the low-level (machine-code-level) interfaces\\[1ex]
+    \begin{tabular}{|p{0.47\textwidth}|p{0.47\textwidth}|}
+      \hline
+      \textbf{ABI}                                    & \textbf{API} \\
+      \hline
+      \hline
+      low-level (binary) interface                    & high-level (source-code) interface \\
+      \hline
+      E.g., data layout, calling convention, \ldots{} & E.g., function name, parameter types, return type, \ldots{}\\
+      \hline
+    \end{tabular}
+  \end{block}
+  \vfill
+
+  Well-known C++ ABIs:\begin{itemize}
+    \item MSVC, used by Microsoft Visual C++
+    \item Itanium C++ ABI, likely used by everything else (incl. \texttt{clang} / \texttt{gcc})\footnote{\url{https://itanium-cxx-abi.github.io/cxx-abi/}}
+  \end{itemize}
+
+  \begin{onlyenv}<2>
+    \overlayLayer{\underline{A C++ ABI usually details}\begin{itemize}
+      \item Exception handling
+      \item Layout of RTTI structures
+      \item Function call 'lowering' (e.g. \texttt{this} argument) --- \alert{but usually no calling convention!}
+      \item Name mangling
+    \end{itemize}}
+  \end{onlyenv}
+\end{frame}
+
+\begin{frame}{Let's talk about ABIs: Calling Conventions}
+  \begin{columns}
+    \column{0.66\textwidth}
+    A calling convention specifies\ldots{}
+    \begin{itemize}
+      \item \textbf{Function arguments / return values:} register / stack~(mem)?
+      \item Which CPU registers are \textbf{scratch}, \textbf{caller-saved}, \textbf{callee-saved}?
+      \item And, possibly, other stack frame layout details
+        \bigskip
+    \end{itemize}
+    \vfill
+    May be specified by a complementary ABI:
+    \begin{itemize}
+      \item \textbf{x86\_64, UNIX-based:} System V ABI\footnote{https://refspecs.linuxbase.org/}.
+      \item \textbf{x86\_64, MSFT-based:} Microsoft x64 ABI
+      \item \textbf{AArch64:} AAPCS64 (AArch64 Prodedure Call Standard)\footnote{https://github.com/ARM-software/abi-aa/blob/main/aapcs64/aapcs64.rst}.
+    \end{itemize}
+
+    \column{0.33\textwidth}
+    \begin{center}
+      \input{fig/stack-frame-aarch64}
+    \end{center}
+  \end{columns}
+\end{frame}
