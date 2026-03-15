@@ -4,11 +4,7 @@
   \begin{block}{SEH}
     SEH (Structured Exception Handling): frame-based EH in Windows.\\[1ex]
     \begin{itemize}
-    \item x86\_64 SEH: somewhat similar to what has been described here
-      \begin{itemize}
-      \item Exception table (\texttt{.pdata}) $\sim$ \texttt{.eh\_frame} section
-      \item Unwind ops $\sim$ DWARF CFI
-      \end{itemize}
+    \item x86\_64 SEH: similar to what has been described here (\texttt{.pdata}, unwind ops)
       \bigskip
 
     \item x86 SEH: different approach\ldots{}

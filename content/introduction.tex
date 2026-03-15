@@ -44,7 +44,7 @@
 
 \begin{frame}{Let's talk about ABIs}
   \begin{block}{Informal definition}
-    An ABI (Application Binary Interface) defines the low-level (machine-code-level) interfaces\\[1ex]
+    Application Binary Interface (ABI): defines the low-level (machine-code-level) interfaces\\[4ex]
     \begin{tabular}{|p{0.47\textwidth}|p{0.47\textwidth}|}
       \hline
       \textbf{ABI}                                    & \textbf{API} \\
@@ -67,7 +67,7 @@
     \overlayLayer{\underline{A C++ ABI usually details}\begin{itemize}
       \item Exception handling
       \item Layout of RTTI structures
-      \item Function call 'lowering' (e.g. \texttt{this} argument) --- \alert{but usually no calling convention!}
+      \item Function call 'lowering' (e.g. \texttt{this}) --- \alert{usually no calling convention!}
       \item Name mangling
     \end{itemize}}
   \end{onlyenv}
@@ -78,7 +78,7 @@
     \column{0.66\textwidth}
     A calling convention specifies\ldots{}
     \begin{itemize}
-      \item \textbf{Function arguments / return values:} register / stack~(mem)?
+      \item \textbf{Function arguments / return values:} register / mem?
       \item Which CPU registers are \textbf{scratch}, \textbf{caller-saved}, \textbf{callee-saved}?
       \item And, possibly, other stack frame layout details
         \bigskip

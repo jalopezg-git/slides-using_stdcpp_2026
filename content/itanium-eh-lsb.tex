@@ -249,7 +249,7 @@ Idx Name               Size     VMA              Type
              \setbeamercolor*{enumerate item}{fg=white}
              \begin{frame}[plain,noframenumbering]
                \centering
-               \vfill\textcolor{white}{\Large LSDA (for the personality routine)}\vfill
+               \vfill\textcolor{white}{\Large LSDA (for the \texttt{\_\_gxx\_personality\_v0}\\personality routine)}\vfill
              \end{frame}
            }
 
@@ -262,7 +262,7 @@ Idx Name               Size     VMA              Type
   \item \textbf{Type Infos:} pointers to RTTI type information (\texttt{0} == \inlineCode{catch (...)})
     \medskip
 
-  \item Actual encoding: \linkButton{https://github.com/llvm/llvm-project/blob/main/libcxxabi/src/cxa_personality.cpp\#L96}{\small See \texttt{llvm-project/blob/main/libcxxabi/src/cxa\_personality.cpp}}
+  \item Actual encoding: \linkButton{https://github.com/llvm/llvm-project/blob/main/libcxxabi/src/cxa_personality.cpp\#L96}{\small See \texttt{llvm-project/\ldots{}/libcxxabi/src/cxa\_personality.cpp}}
   \end{itemize}
 
   \begin{onlyenv}<2->
