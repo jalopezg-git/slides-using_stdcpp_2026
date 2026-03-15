@@ -253,13 +253,31 @@ Idx Name               Size     VMA              Type
              \end{frame}
            }
 
-\begin{frame}{LSDA: \texttt{.gcc\_except\_table}: Exception tables}
+\begin{frame}[fragile]{LSDA: \texttt{.gcc\_except\_table}: Exception tables}
   \begin{center}
-    \resizebox{0.75\textwidth}{!}{\input{fig/gcc-except-table-layout}}
+    \resizebox{0.65\textwidth}{!}{\input{fig/gcc-except-table-layout}}
   \end{center}
   \vfill
   \begin{itemize}
   \item \textbf{Type Infos:} pointers to RTTI type information (\texttt{0} == \inlineCode{catch (...)})
+    \begin{itemize}
+    \item %
+      \begin{minipage}{0.4\textwidth}
+        \begin{lstlisting}[style=asm,basicstyle={\ttfamily\tiny}]
+                             # >> Catch TypeInfos <<
+	.long	0                   # TypeInfo 2
+.Ltmp29:                     # TypeInfo 1
+	.long	`\lsthl{.L\_ZTISt13runtime\_error.DW.stub}`-.Ltmp29
+        \end{lstlisting}
+      \end{minipage}
+      $\rightarrow$%
+      \begin{minipage}{0.4\textwidth}
+        \begin{lstlisting}[style=asm,basicstyle={\ttfamily\tiny}]
+.L_ZTISt13runtime_error.DW.stub:
+	.quad	_ZTISt13runtime_error
+        \end{lstlisting}
+      \end{minipage}
+    \end{itemize}
     \medskip
 
   \item Actual encoding: \linkButton{https://github.com/llvm/llvm-project/blob/main/libcxxabi/src/cxa_personality.cpp\#L96}{\small See \texttt{llvm-project/\ldots{}/libcxxabi/src/cxa\_personality.cpp}}
