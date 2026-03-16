@@ -50,7 +50,7 @@
   \begin{lstlisting}[style=c++,basicstyle={\ttfamily\footnotesize},linewidth=0.8\textwidth]
   struct _Unwind_Exception {
     uint64	 exception_class; // 4 MSB = vendor
-                                  // 4 LSB = lang (C++ == "C++\0")
+                              // 4 LSB = lang (C++ == "C++\0")
     _Unwind_Exception_Cleanup_Fn exception_cleanup;
     uint64	 private_1;       // Unwinder-internal
     uint64	 private_2;
@@ -131,8 +131,8 @@ _Unwind_Reason_Code `\lsthl{\_Unwind\_RaiseException}`(struct _Unwind_Exception 
     struct __cxa_exception {
       std::type_info *	 exceptionType;
       void               (*exceptionDestructor) (void *);
-      unexpected_handler unexpectedHandler;  //  .- At throw point
-      terminate_handler	 terminateHandler;   // ,
+      unexpected_handler unexpectedHandler;  //  \- At throw point
+      terminate_handler	 terminateHandler;   //  /
       __cxa_exception *	 nextException;
 
       int         handlerCount;

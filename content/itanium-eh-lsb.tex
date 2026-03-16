@@ -231,7 +231,7 @@ Idx Name               Size     VMA              Type
     \column{0.5\textwidth}
     \begin{itemize}
     \item Can encode a range's unwind-info in 32-bits (most of the time)
-    \item Replaces both \texttt{.eh\_frame} and \texttt{.eh\_frame\_hdr}
+    \item Replaces both \texttt{.eh\_frame} and \texttt{.eh\_frame\_hdr}\footnote{If assumptions hold; otherwise, fall back to DWARF CFI.}
     \end{itemize}
 
     \column{0.5\textwidth}
